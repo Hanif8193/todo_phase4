@@ -1,0 +1,132 @@
+# Default values for todo-chatbot Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Frontend configuration
+frontend:
+  replicaCount: 2
+  image:
+    repository: todo-frontend
+    tag: "1.0.0"
+    pullPolicy: Never  # Use local images for Minikube
+
+  service:
+    type: NodePort
+    port: 3000
+    targetPort: 3000
+    nodePort: 30080  # Fixed NodePort for team consistency
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  env:
+    nodeEnv: production
+    port: "3000"
+    hostname: "0.0.0.0"
+
+  probes:
+    liveness:
+      enabled: true
+      path: /
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      enabled: true
+      path: /
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    allowPrivilegeEscalation: false
+
+# Backend configuration
+backend:
+  replicaCount: 1
+  image:
+    repository: todo-backend
+    tag: "1.0.0"
+    pullPolicy: Never  # Use local images for Minikube
+
+  service:
+    type: NodePort
+    port: 8000
+    targetPort: 8000
+    nodePort: 30800  # Fixed NodePort for team consistency
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  probes:
+    liveness:
+      enabled: true
+      path: /health
+      initialDelaySeconds: 40
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readiness:
+      enabled: true
+      path: /health
+      initialDelaySeconds: 20
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+
+# Configuration (non-sensitive)
+config:
+  environment: development
+  logLevel: INFO
+  port: "8000"
+  frontendUrl: "http://localhost:30080"
+  apiUrl: "http://localhost:30800"
+  allowedOrigins: "*"
+
+# Secrets (PLACEHOLDER - Replace in values-local.yaml)
+# DO NOT commit actual secrets to version control
+secrets:
+  # Database connection string
+  # Example: postgresql+asyncpg://user:password@localhost:5432/todo_db
+  databaseUrl: "REPLACE_ME"
+
+  # OpenAI API Key
+  openaiApiKey: "REPLACE_ME"
+
+  # Anthropic API Key (optional)
+  anthropicApiKey: ""
+
+  # Authentication secret for JWT tokens
+  betterAuthSecret: "REPLACE_ME"
+
+  # JWT Secret
+  jwtSecret: "REPLACE_ME"
+
+# Global settings
+namespace: todo-app
+
+# Strategy for deployments
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0

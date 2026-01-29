@@ -1,0 +1,38 @@
+# Local development values for todo-chatbot
+# Copy this file to values-local.yaml and replace placeholders with actual values
+# DO NOT commit values-local.yaml to version control!
+
+# Frontend configuration
+frontend:
+  replicaCount: 2
+
+# Backend configuration
+backend:
+  replicaCount: 1
+
+# Configuration (non-sensitive)
+config:
+  environment: development
+  logLevel: INFO
+  port: "8000"
+  frontendUrl: "http://localhost:30080"
+  apiUrl: "http://localhost:30800"
+  allowedOrigins: "*"
+
+# Secrets - REPLACE ALL VALUES BELOW
+secrets:
+  # Database connection string
+  # Example: postgresql+asyncpg://postgres:password@localhost:5432/todo_db
+  databaseUrl: "postgresql+asyncpg://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST:5432/YOUR_DB_NAME"
+
+  # OpenAI API Key (get from https://platform.openai.com/api-keys)
+  openaiApiKey: "sk-YOUR_OPENAI_API_KEY_HERE"
+
+  # Anthropic API Key (optional, get from https://console.anthropic.com/)
+  anthropicApiKey: "sk-ant-YOUR_ANTHROPIC_API_KEY_HERE"
+
+  # Authentication secret (generate with: openssl rand -hex 32)
+  betterAuthSecret: "YOUR_BETTER_AUTH_SECRET_HERE"
+
+  # JWT Secret (generate with: openssl rand -hex 32)
+  jwtSecret: "YOUR_JWT_SECRET_HERE"

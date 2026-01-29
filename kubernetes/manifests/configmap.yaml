@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: todo-chatbot-config
+  namespace: todo-app
+  labels:
+    app: todo-chatbot
+    component: configuration
+data:
+  # Environment configuration
+  ENVIRONMENT: "development"
+  LOG_LEVEL: "INFO"
+
+  # Backend configuration
+  PORT: "8000"
+
+  # Frontend configuration
+  NEXT_PUBLIC_API_URL: "http://localhost:30800"
+
+  # CORS configuration (for backend)
+  ALLOWED_ORIGINS: "*"

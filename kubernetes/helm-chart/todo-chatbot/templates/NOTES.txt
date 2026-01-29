@@ -1,0 +1,52 @@
+🎉 Todo Chatbot has been deployed successfully!
+
+Release Name: {{ .Release.Name }}
+Namespace: {{ .Values.namespace }}
+Chart Version: {{ .Chart.Version }}
+App Version: {{ .Chart.AppVersion }}
+
+📦 Deployed Components:
+  ✓ Frontend (Next.js): {{ .Values.frontend.replicaCount }} replica(s)
+  ✓ Backend (FastAPI): {{ .Values.backend.replicaCount }} replica(s)
+  ✓ ConfigMap: {{ include "todo-chatbot.fullname" . }}-config
+  ✓ Secrets: {{ include "todo-chatbot.fullname" . }}-secrets
+
+🌐 Access URLs:
+  Frontend: http://localhost:{{ .Values.frontend.service.nodePort }}
+  Backend API: http://localhost:{{ .Values.backend.service.nodePort }}
+  Backend Health: http://localhost:{{ .Values.backend.service.nodePort }}/health
+  Backend Docs: http://localhost:{{ .Values.backend.service.nodePort }}/docs
+
+📊 Check Deployment Status:
+  kubectl get pods -n {{ .Values.namespace }}
+  kubectl get services -n {{ .Values.namespace }}
+  kubectl get deployments -n {{ .Values.namespace }}
+
+🔍 View Logs:
+  # Frontend logs
+  kubectl logs -f -n {{ .Values.namespace }} -l app=frontend
+
+  # Backend logs
+  kubectl logs -f -n {{ .Values.namespace }} -l app=backend
+
+🔧 Troubleshooting:
+  # Check pod events
+  kubectl get events -n {{ .Values.namespace }} --sort-by='.lastTimestamp'
+
+  # Describe a pod
+  kubectl describe pod <pod-name> -n {{ .Values.namespace }}
+
+  # Check pod status
+  kubectl get pods -n {{ .Values.namespace }} -o wide
+
+📝 Configuration:
+  Environment: {{ .Values.config.environment }}
+  Log Level: {{ .Values.config.logLevel }}
+
+⚠️  Important Notes:
+  - Frontend runs on NodePort {{ .Values.frontend.service.nodePort }}
+  - Backend runs on NodePort {{ .Values.backend.service.nodePort }}
+  - Ensure secrets are properly configured in values-local.yaml
+  - Database must be accessible at the configured DATABASE_URL
+
+Happy coding! 🚀

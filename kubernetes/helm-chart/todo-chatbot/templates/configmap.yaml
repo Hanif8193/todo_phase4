@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo-chatbot.fullname" . }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-chatbot.labels" . | nindent 4 }}
+    component: configuration
+data:
+  # Environment configuration
+  ENVIRONMENT: {{ .Values.config.environment | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+
+  # Backend configuration
+  PORT: {{ .Values.config.port | quote }}
+
+  # Frontend configuration
+  NEXT_PUBLIC_API_URL: {{ .Values.config.apiUrl | quote }}
+
+  # CORS configuration (for backend)
+  ALLOWED_ORIGINS: {{ .Values.config.allowedOrigins | quote }}
