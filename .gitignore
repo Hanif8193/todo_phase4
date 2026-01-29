@@ -77,3 +77,6 @@ desktop.ini
 .coverage
 htmlcov/
 .pytest_cache/
+kubernetes/scripts/minikube-*
+*.exe
+*.bin
