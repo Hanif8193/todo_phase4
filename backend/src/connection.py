@@ -1,20 +1,31 @@
 
 # connection.py
-from agents import AsyncOpenAI, OpenAIChatCompletionsModel, RunConfig, Agent, Runner
+from openai import AsyncOpenAI
+import os
 
 def create_agent():
     """
-    Create and return your AI agent
+    Create and return OpenAI client
     """
-    # Example: initialize agent with a chat model
-    model = OpenAIChatCompletionsModel(model_name="gpt-4")
-    config = RunConfig()
-    agent = Agent(model=model, config=config)
-    return agent
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY environment variable not set")
 
-def run_agent(agent, task: str):
+    client = AsyncOpenAI(api_key=api_key)
+    return client
+
+async def run_agent(agent, task: str):
     """
-    Run a task through the agent
+    Run a task through the OpenAI client
     """
-    runner = Runner(agent)
-    return runner.run(task)
+    try:
+        response = await agent.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant for managing todos."},
+                {"role": "user", "content": task}
+            ]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise Exception(f"Error running agent: {str(e)}")

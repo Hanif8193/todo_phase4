@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Todo Chatbot</title>
+</head>
+<body>
+    <h1>AI Todo Chatbot</h1>
+
+    <input type="text" id="taskInput" placeholder="Enter a task">
+    <button onclick="addTodo()">Add Task</button>
+    <button onclick="runTask()">Run AI Task</button>
+
+    <h2>Todo List</h2>
+    <ul id="todoList"></ul>
+
+    <h2>AI Result</h2>
+    <div id="aiResult"></div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        async function fetchTodos() {
+            const res = await fetch(`${API_BASE}/todos`);
+            const data = await res.json();
+            const ul = document.getElementById("todoList");
+            ul.innerHTML = "";
+            data.todos.forEach(task => {
+                const li = document.createElement("li");
+                li.textContent = task;
+                ul.appendChild(li);
+            });
+        }
+
+        async function addTodo() {
+            const task = document.getElementById("taskInput").value;
+            if (!task) return alert("Enter a task first");
+            await fetch(`${API_BASE}/todos`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ task })
+            });
+            document.getElementById("taskInput").value = "";
+            fetchTodos();
+        }
+
+        async function runTask() {
+            const task = document.getElementById("taskInput").value;
+            if (!task) return alert("Enter a task first");
+            const res = await fetch(`${API_BASE}/todos/run`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ task })
+            });
+            const data = await res.json();
+            document.getElementById("aiResult").textContent = data.result || JSON.stringify(data);
+        }
+
+        fetchTodos();
+    </script>
+</body>
+</html>
