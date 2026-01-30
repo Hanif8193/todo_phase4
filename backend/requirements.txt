@@ -1,7 +1,7 @@
-
 fastapi==0.111.0
 uvicorn[standard]==0.23.2
 pydantic==2.6.0
 openai==1.29.0
-tensorflow==2.14.0
-agents==latest # replace with your working agents package
+python-dotenv==1.0.0
+# tensorflow==2.14.0  # Commented out - very large, only uncomment if needed
+# agents==latest  # Replace with your working agents package if needed

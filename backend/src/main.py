@@ -1,8 +1,22 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from connection import create_agent, run_agent
+import os
 
 app = FastAPI(title="AI Todo Chatbot", version="1.0")
+
+# CORS configuration
+# In production, replace "*" with your specific Vercel domain
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Initialize the agent (can be async if needed)
 agent = create_agent()
