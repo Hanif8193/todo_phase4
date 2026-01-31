@@ -5,8 +5,9 @@ from connection import create_agent, run_agent
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables (for local development)
 load_dotenv()
+
 
 # Initialize FastAPI
 app = FastAPI(title="AI Todo Chatbot", version="1.0")

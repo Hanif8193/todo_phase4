@@ -1,0 +1,15 @@
+# Requirements optimized for Python 3.10 on PythonAnywhere
+# These versions have confirmed manylinux wheels
+
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+openai==1.12.0
+python-dotenv==1.0.1
+
+# Alternative: if above fails, use these older but stable versions
+# fastapi==0.104.1
+# uvicorn[standard]==0.24.0
+# pydantic==2.4.2
+# openai==1.6.1
+# python-dotenv==1.0.0
