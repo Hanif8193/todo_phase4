@@ -1,9 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from .connection import create_agent, run_agent
 import os
 from dotenv import load_dotenv
+
+# Import connection - handle both local and Vercel environments
+try:
+    from .connection import create_agent, run_agent
+except ImportError:
+    from connection import create_agent, run_agent
 
 # Load environment variables (for local development)
 load_dotenv()
