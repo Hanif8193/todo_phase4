@@ -40,6 +40,12 @@ export const todoApi = {
     return response.data;
   },
 
+  // Delete a todo
+  deleteTodo: async (index: number): Promise<AddTodoResponse> => {
+    const response = await api.delete<AddTodoResponse>(`/todos/${index}`);
+    return response.data;
+  },
+
   // Run AI agent on a task
   runTask: async (task: string): Promise<RunTaskResponse> => {
     const response = await api.post<RunTaskResponse>('/todos/run', { task });

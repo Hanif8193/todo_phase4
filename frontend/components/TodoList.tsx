@@ -7,6 +7,7 @@ export default function TodoList() {
   const [todos, setTodos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   const fetchTodos = async () => {
     try {
@@ -19,6 +20,19 @@ export default function TodoList() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (index: number) => {
+    try {
+      setDeleting(index);
+      await todoApi.deleteTodo(index);
+      await fetchTodos(); // Refresh the list
+    } catch (err) {
+      console.error('Failed to delete todo:', err);
+      setError('Failed to delete todo');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -71,12 +85,22 @@ export default function TodoList() {
           {todos.map((todo, index) => (
             <li
               key={index}
-              className="flex items-start p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition"
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition group"
             >
-              <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
-                {index + 1}
-              </span>
-              <span className="text-gray-800">{todo}</span>
+              <div className="flex items-start flex-1">
+                <span className="flex-shrink-0 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
+                  {index + 1}
+                </span>
+                <span className="text-gray-800">{todo}</span>
+              </div>
+              <button
+                onClick={() => handleDelete(index)}
+                disabled={deleting === index}
+                className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                title="Delete todo"
+              >
+                {deleting === index ? 'Deleting...' : 'Delete'}
+              </button>
             </li>
           ))}
         </ul>
