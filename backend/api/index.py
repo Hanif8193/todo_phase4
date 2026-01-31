@@ -13,4 +13,4 @@ from main import app
 # Note: Vercel will call this directly with ASGI events
 from mangum import Mangum
 
-handler = Mangum(app, lifespan="off", api_gateway_base_path="/api")
+handler = Mangum(app, lifespan="off")
