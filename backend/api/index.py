@@ -58,5 +58,14 @@ async def run_task(item: TodoItem):
         detail="AI features not available in this deployment. Set OPENAI_API_KEY to enable."
     )
 
-# Vercel handler
-handler = Mangum(app, lifespan="off")
+# Vercel handler - wrap Mangum to catch initialization errors
+try:
+    handler = Mangum(app, lifespan="off")
+except Exception as e:
+    # Fallback handler for debugging
+    def handler(event, context):
+        return {
+            "statusCode": 500,
+            "body": f'{{"error": "Mangum initialization failed", "details": "{str(e)}"}}',
+            "headers": {"Content-Type": "application/json"}
+        }
