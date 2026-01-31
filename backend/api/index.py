@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from mangum import Mangum
 import os
+import sys
+import traceback
 
 # Create FastAPI app directly here
 app = FastAPI(title="AI Todo Chatbot", version="1.0")
@@ -58,14 +59,26 @@ async def run_task(item: TodoItem):
         detail="AI features not available in this deployment. Set OPENAI_API_KEY to enable."
     )
 
-# Vercel handler - wrap Mangum to catch initialization errors
+# Vercel handler - try to import and use Mangum with better error handling
 try:
+    from mangum import Mangum
     handler = Mangum(app, lifespan="off")
+    print("Mangum handler initialized successfully", file=sys.stderr)
 except Exception as e:
+    print(f"Error initializing Mangum: {e}", file=sys.stderr)
+    print(traceback.format_exc(), file=sys.stderr)
+
     # Fallback handler for debugging
     def handler(event, context):
+        error_details = {
+            "error": "Mangum initialization or import failed",
+            "details": str(e),
+            "traceback": traceback.format_exc(),
+            "python_version": sys.version,
+            "event_type": type(event).__name__
+        }
         return {
             "statusCode": 500,
-            "body": f'{{"error": "Mangum initialization failed", "details": "{str(e)}"}}',
+            "body": str(error_details),
             "headers": {"Content-Type": "application/json"}
         }
