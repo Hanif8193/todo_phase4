@@ -1,84 +1,92 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+import json
 import os
-import sys
-import traceback
 
-# Create FastAPI app directly here
-app = FastAPI(title="AI Todo Chatbot", version="1.0")
-
-# CORS configuration
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Todo model
-class TodoItem(BaseModel):
-    task: str
-
-# In-memory list (Note: This resets on each deployment)
+# Simple in-memory todo list (resets on each deployment)
 todo_list = []
 
-# Routes
-@app.get("/")
-def root():
-    return {"message": "AI Todo Chatbot is running on Vercel!"}
+class handler(BaseHTTPRequestHandler):
+    def _send_json_response(self, status_code, data):
+        """Helper to send JSON response"""
+        self.send_response(status_code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+    def do_OPTIONS(self):
+        """Handle CORS preflight"""
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
-@app.get("/todos")
-def get_todos():
-    return {"todos": todo_list}
+    def do_GET(self):
+        """Handle GET requests"""
+        path = urlparse(self.path).path
 
-@app.post("/todos")
-def add_todo(item: TodoItem):
-    todo_list.append(item.task)
-    return {"message": f"Task '{item.task}' added successfully!", "todos": todo_list}
+        if path == '/' or path == '/api' or path == '/api/':
+            self._send_json_response(200, {"message": "AI Todo Chatbot is running on Vercel!"})
+        elif path == '/health' or path == '/api/health':
+            self._send_json_response(200, {"status": "ok"})
+        elif path == '/todos' or path == '/api/todos':
+            self._send_json_response(200, {"todos": todo_list})
+        else:
+            self._send_json_response(404, {"error": "Not found"})
 
-@app.delete("/todos/{index}")
-def delete_todo(index: int):
-    if 0 <= index < len(todo_list):
-        deleted_task = todo_list.pop(index)
-        return {"message": f"Task '{deleted_task}' deleted successfully!", "todos": todo_list}
-    raise HTTPException(status_code=404, detail="Todo not found")
+    def do_POST(self):
+        """Handle POST requests"""
+        path = urlparse(self.path).path
+        content_length = int(self.headers.get('Content-Length', 0))
 
-# AI endpoint (disabled - no OpenAI key needed for basic features)
-@app.post("/todos/run")
-async def run_task(item: TodoItem):
-    raise HTTPException(
-        status_code=503,
-        detail="AI features not available in this deployment. Set OPENAI_API_KEY to enable."
-    )
+        if content_length > 0:
+            body = self.rfile.read(content_length)
+            try:
+                data = json.loads(body.decode())
+            except json.JSONDecodeError:
+                self._send_json_response(400, {"error": "Invalid JSON"})
+                return
+        else:
+            data = {}
 
-# Vercel handler - try to import and use Mangum with better error handling
-try:
-    from mangum import Mangum
-    handler = Mangum(app, lifespan="off")
-    print("Mangum handler initialized successfully", file=sys.stderr)
-except Exception as e:
-    print(f"Error initializing Mangum: {e}", file=sys.stderr)
-    print(traceback.format_exc(), file=sys.stderr)
+        if path == '/todos' or path == '/api/todos':
+            task = data.get('task', '')
+            if task:
+                todo_list.append(task)
+                self._send_json_response(200, {
+                    "message": f"Task '{task}' added successfully!",
+                    "todos": todo_list
+                })
+            else:
+                self._send_json_response(400, {"error": "Task is required"})
+        elif path == '/todos/run' or path == '/api/todos/run':
+            self._send_json_response(503, {
+                "error": "AI features not available in this deployment. Set OPENAI_API_KEY to enable."
+            })
+        else:
+            self._send_json_response(404, {"error": "Not found"})
 
-    # Fallback handler for debugging
-    def handler(event, context):
-        error_details = {
-            "error": "Mangum initialization or import failed",
-            "details": str(e),
-            "traceback": traceback.format_exc(),
-            "python_version": sys.version,
-            "event_type": type(event).__name__
-        }
-        return {
-            "statusCode": 500,
-            "body": str(error_details),
-            "headers": {"Content-Type": "application/json"}
-        }
+    def do_DELETE(self):
+        """Handle DELETE requests"""
+        path = urlparse(self.path).path
+
+        # Parse index from path like /todos/0
+        if path.startswith('/todos/') or path.startswith('/api/todos/'):
+            try:
+                index = int(path.split('/')[-1])
+                if 0 <= index < len(todo_list):
+                    deleted_task = todo_list.pop(index)
+                    self._send_json_response(200, {
+                        "message": f"Task '{deleted_task}' deleted successfully!",
+                        "todos": todo_list
+                    })
+                else:
+                    self._send_json_response(404, {"error": "Todo not found"})
+            except (ValueError, IndexError):
+                self._send_json_response(400, {"error": "Invalid index"})
+        else:
+            self._send_json_response(404, {"error": "Not found"})
