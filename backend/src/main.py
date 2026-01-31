@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from connection import create_agent, run_agent
+from .connection import create_agent, run_agent
 import os
 from dotenv import load_dotenv
 
@@ -23,8 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize the agent
-agent = create_agent()
+# Initialize the agent (optional - app will work without it for basic features)
+try:
+    agent = create_agent()
+    print("OpenAI agent initialized successfully")
+except ValueError as e:
+    agent = None
+    print(f"Warning: {e}")
+    print("AI chat features will not work. Add your API key to backend/.env")
 
 # Todo model
 class TodoItem(BaseModel):
@@ -57,6 +63,11 @@ def add_todo(item: TodoItem):
 # Run AI agent task
 @app.post("/todos/run")
 async def run_task(item: TodoItem):
+    if agent is None:
+        raise HTTPException(
+            status_code=503,
+            detail="AI features not available. Please set OPENAI_API_KEY in backend/.env"
+        )
     try:
         result = await run_agent(agent, item.task)
         return {"task": item.task, "result": result}

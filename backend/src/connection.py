@@ -8,8 +8,8 @@ def create_agent():
     Create and return OpenAI client
     """
     api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable not set")
+    if not api_key or api_key == "sk-your-new-api-key-here":
+        raise ValueError("OPENAI_API_KEY environment variable not set or using placeholder")
 
     client = AsyncOpenAI(api_key=api_key)
     return client

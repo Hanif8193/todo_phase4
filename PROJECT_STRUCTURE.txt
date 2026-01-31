@@ -1,0 +1,39 @@
+📁 todo_phase4/ (Clean Vercel-Ready Structure)
+│
+├── 📄 README.md                    # Main project documentation
+├── 📄 README_VERCEL.md             # Vercel deployment overview
+├── 📄 VERCEL_DEPLOYMENT.md         # Detailed deployment guide
+├── 📄 VERCEL_QUICK_START.md        # Quick deployment checklist
+│
+├── 📁 backend/                     # FastAPI Backend
+│   ├── 📄 .env                     # Local environment variables (not in git)
+│   ├── 📄 .env.example             # Environment template
+│   ├── 📄 requirements.txt         # Python dependencies
+│   ├── 📄 vercel.json              # Vercel configuration
+│   ├── 📁 src/                     # Source code
+│   │   ├── main.py                 # FastAPI app entry point
+│   │   ├── connection.py           # OpenAI integration
+│   │   ├── agent_connector.py      # Agent utilities
+│   │   └── chat.py                 # Chat functionality
+│   └── 📁 venv/                    # Virtual environment (local only)
+│
+├── 📁 frontend/                    # Next.js Frontend
+│   ├── 📄 package.json             # Node dependencies
+│   ├── 📄 vercel.json              # Vercel configuration
+│   ├── 📄 tsconfig.json            # TypeScript config
+│   ├── 📄 tailwind.config.js       # Tailwind CSS config
+│   ├── 📁 app/                     # Next.js App Router
+│   │   ├── page.tsx                # Home page
+│   │   ├── layout.tsx              # App layout
+│   │   └── globals.css             # Global styles
+│   ├── 📁 components/              # React components
+│   │   ├── TodoList.tsx
+│   │   └── ChatInterface.tsx
+│   └── 📁 lib/                     # Utilities
+│       └── api.ts                  # API client
+│
+├── 📁 .claude/                     # Claude Code configuration
+├── 📁 .specify/                    # Spec-driven development templates
+├── 📁 history/                     # Development history & ADRs
+├── 📁 specs/                       # Feature specifications
+└── 📁 kubernetes/                  # Kubernetes configs (if needed later)
