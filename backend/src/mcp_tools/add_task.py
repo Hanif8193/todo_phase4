@@ -70,7 +70,7 @@ async def complete_task(task_id: int) -> Dict[str, Any]:
     Returns:
         A dictionary containing the id of the completed task.
     """
-    result = await db.execute("UPDATE tasks SET completed = TRUE WHERE id = :id", {"id": task_id})
+    result = await db.execute("UPDATE tasks SET completed = TRUE WHERE id = :id", {"id": task_id, "completed": True})
     if not result:
         raise ValueError(f"Task with id {task_id} not found.")
     return result[0]
